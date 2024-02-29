@@ -65,7 +65,7 @@ exports.updateFarm = async function (req, res) {
         area,
         village,
         cropGrown,
-        sowingDate: new Date(sowingDate),
+        sowingDate: sowingDate == null ? null : new Date(sowingDate),
         country,
         farmerId
       },

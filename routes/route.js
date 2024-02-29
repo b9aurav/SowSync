@@ -9,6 +9,7 @@ router.post('/getFarmers', farmerController.getFarmers);
 router.post('/addFarmer', farmerController.addFarmer);
 router.post('/removeFarmer', farmerController.removeFarmer);
 router.post('/updateFarmer', farmerController.updateFarmer);
+router.post('/getFarmersGrowingCrop', farmerController.getFarmersGrowingCrop);
 
 router.post('/getFarms', farmController.getFarms);
 router.post('/addFarm', farmController.addFarm);

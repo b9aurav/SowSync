@@ -73,3 +73,28 @@ exports.updateFarmer = async function (req, res) {
       console.error("Error:", error.message);
     });
 };
+
+exports.getFarmersGrowingCrop = async function (req, res) {
+    await prisma.farmer.findMany({
+        where: {
+            farms: {
+                some: {
+                    cropGrown: {
+                        not: ""
+                    }
+                }
+            }
+        },
+        include: {
+            farms: true
+        }
+    })
+    .then((farmers) => {
+      res.json(farmers);
+      console.log("Info: Total", farmers.length, "farmers growing crop.");
+    })
+    .catch((error) => {
+      res.json({ error: error.message });
+      console.error("Error:", error.message);
+    });
+}
