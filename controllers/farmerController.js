@@ -98,3 +98,36 @@ exports.getFarmersGrowingCrop = async function (req, res) {
       console.error("Error:", error.message);
     });
 }
+
+exports.calculateBill = async function (req, res) {
+    const { farmerId, fertiliserPrices } = req.body;
+    await prisma.farm.findMany({
+        where: {
+            farmerId: req.body.farmerId
+        },
+        include: {
+            schedules: true
+        }
+    })
+    .then((farms) => {
+        let totalCost = 0;
+        for (const farm of farms) {
+            for (const schedule of farm.schedules) {
+                const fertiliserPrice = fertiliserPrices[schedule.fertiliser];
+                if (fertiliserPrice) {
+                    totalCost += fertiliserPrice * schedule.quantity;
+                } else {
+                    res.json({ error: `Fertiliser ${schedule.fertiliser} not found in prices list` });
+                    console.error(`Error: Fertiliser ${schedule.fertiliser} not found in prices list`);
+                    return;
+                }
+            }
+        }
+        res.json({ "totalCost": totalCost });
+        console.log("Info: Total cost calculated for farmer with ID", farmerId);
+    })
+    .catch((error) => {
+      res.json({ error: error.message });
+      console.error("Error:", error.message);
+    });
+}
