@@ -37,6 +37,7 @@ npm test
 
 ### Farmer:
 ##### `/getFarmers` - Get all farmers from database.
+##### `/getFarmerById` - Get farmer details by ID.
 ##### `/addFarmer` - Add new farmer to database.
 ##### `/removeFarmer` - Remove farmer from database.
 ##### `/updateFarmer` - Update farmer details.
@@ -45,12 +46,16 @@ npm test
 
 ### Farm
 ##### `/getFarms` - Get all farms from database.
+##### `/getFarmById` - Get farm details by ID.
+##### `/getFarmsByFarmerId` - Get all farm details of a farmer. 
 ##### `/addFarm` - Add new farm to database.
 ##### `/removeFarm` - Remove farm from database.
 ##### `/updateFarm` - Update farm details.
 
 ### Schedule
 ##### `/getSchedules` - Get all schedules from database.
+##### `/getScheduleById` - Get schedule details by ID.
+##### `/getSchedulesByFarmId` - Get all schedules of a farm.
 ##### `/addSchedule` - Add new schedule to database.
 ##### `/removeSchedule` - Remove schedule from database.
 ##### `/updateSchedule` - Update schedule details.

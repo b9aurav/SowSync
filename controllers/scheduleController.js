@@ -35,6 +35,50 @@ exports.getSchedules = async function (req, res) {
     });
 };
 
+exports.getScheduleById = async function (req, res) {
+  const { id } = req.body;
+  await prisma.schedule
+    .findUnique({
+      where: {
+        id: id,
+      },
+    })
+    .then((schedule) => {
+      if (!schedule) {
+        return res.status(400).json({ error: "Schedule ID does not exist" });
+      }
+      res.json(schedule);
+    });
+};
+
+exports.getSchedulesByFarmId = async function (req, res) {
+  const { farmId } = req.body;
+  const farm = await prisma.farm.findUnique({
+    where: {
+      id: farmId,
+    },
+  });
+
+  if (!farm) {
+    return res.status(400).json({ error: "Farm ID does not exist" });
+  }
+
+  await prisma.schedule.findMany({
+    where: {
+      farmId: farmId,
+    },
+  })
+  .then((schedules) => {
+    res.json(schedules);
+    console.log("Info: Total", schedules.length, "schedules found for farm ID", farmId);
+  })
+  .catch((error) => {
+    res.json({ error: error.message });
+    console.error("Error:", error.message);
+  });
+};
+
+
 exports.addSchedule = async function (req, res) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {

@@ -38,6 +38,51 @@ exports.getFarms = async function (req, res) {
     });
 };
 
+exports.getFarmById = async function (req, res) {
+  const { id } = req.body;
+  await prisma.farm
+    .findUnique({
+      where: {
+        id: id,
+      },
+    })
+    .then((farm) => {
+      if (!farm) {
+        return res.status(400).json({ error: "Farm ID does not exist" });
+      }
+      res.json(farm);
+    });
+};
+
+exports.getFarmsByFarmerId = async function (req, res) {
+  const { farmerId } = req.body;
+  const farmer = await prisma.farmer.findUnique({
+    where: {
+      id: farmerId,
+    },
+  });
+
+  if (!farmer) {
+    return res.status(400).json({ error: "Farmer ID does not exist" });
+  }
+
+  await prisma.farm
+    .findMany({
+      where: {
+        farmerId: farmerId,
+      },
+    })
+    .then((farms) => {
+      res.json(farms);
+      console.log(
+        "Info: Total",
+        farms.length,
+        "farms found for farmer ID",
+        farmerId
+      );
+    });
+};
+
 exports.addFarm = async function (req, res) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {

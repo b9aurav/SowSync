@@ -37,6 +37,22 @@ exports.getFarmers = async function (req, res) {
     });
 };
 
+exports.getFarmerById = async function (req, res) {
+  const { id } = req.body;
+  await prisma.farmer
+    .findUnique({
+      where: {
+        id: id,
+      },
+    })
+    .then((farmer) => {
+      if (!farmer) {
+        return res.status(400).json({ error: "Farmer ID does not exist" });
+      }
+      res.json(farmer);
+    });
+};
+
 exports.addFarmer = async function (req, res) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
