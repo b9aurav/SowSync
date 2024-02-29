@@ -43,6 +43,17 @@ npm test
 ##### `/updateFarmer` - Update farmer details.
 ##### `/getFarmersGrowingCrop` - Get all farmers who are growing crop.
 ##### `/calculateBill` - Calculate the bill of fertiliser for a single farmer.
+```
+body params example:
+{
+  "farmerId": "farmer_id",
+  "fertiliserPrices": {
+    "Fertiliser 1": {"price": 10, "unit": "g"},
+    "Fertiliser 2": {"price": 20, "unit": "kg"},
+    "Fertiliser 3": {"price": 30, "unit": "ton"}
+  }
+}
+```
 
 ### Farm
 ##### `/getFarms` - Get all farms from database.

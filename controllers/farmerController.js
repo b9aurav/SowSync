@@ -205,7 +205,14 @@ exports.calculateBill = async function (req, res) {
         for (const schedule of farm.schedules) {
           const fertiliserPrice = fertiliserPrices[schedule.fertiliser];
           if (fertiliserPrice) {
-            totalCost += fertiliserPrice * schedule.quantity;
+            const priceUnit = fertiliserPrice.unit;
+            const convertedQuantity = convertQuantity(
+              schedule.quantity,
+              schedule.quantityUnit,
+              priceUnit
+            );
+            console.log(convertedQuantity);
+            totalCost += fertiliserPrice.price * convertedQuantity;
           } else {
             res.json({
               error: `Fertiliser ${schedule.fertiliser} not found in prices list`,
@@ -225,3 +232,28 @@ exports.calculateBill = async function (req, res) {
       console.error("Error:", error.message);
     });
 };
+
+function convertQuantity(quantity, quantityUnit, priceUnit) {
+  const conversionRates = {
+    g: {
+      kg: 0.001,
+      ton: 0.000001,
+    },
+    kg: {
+      g: 1000,
+      ton: 0.001,
+    },
+    ton: {
+      g: 1000000,
+      kg: 1000,
+    },
+    mL: {
+      L: 0.001,
+    },
+    L: {
+      mL: 1000,
+    },
+  };
+
+  return quantity * (conversionRates[quantityUnit][priceUnit] || 1);
+}
