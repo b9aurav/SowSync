@@ -15,3 +15,6 @@ var server = app.listen(process.env.PORT || 3000, function () {
     var port = server.address().port;
     console.log("API is live on port", port, '\n');
 });
+
+module.exports = app;
+module.exports = server;
