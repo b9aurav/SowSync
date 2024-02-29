@@ -77,9 +77,9 @@ describe("POST /calculateBill", () => {
     const body = {
       farmerId: farmer.id,
       fertiliserPrices: {
-        "Fertiliser A": 10,
-        "Fertiliser B": 20,
-        "Fertiliser C": 30,
+        "Fertiliser A": { price: 10, unit: "g" },
+        "Fertiliser B": { price: 20, unit: "kg" },
+        "Fertiliser C": { price: 30, unit: "ton" },
       },
     };
 
