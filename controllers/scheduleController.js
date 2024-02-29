@@ -1,4 +1,26 @@
 const prisma = require("../lib/prisma");
+const { check, validationResult } = require("express-validator");
+
+exports.validateSchedule = [
+  check("daysAfterSowing")
+    .optional()
+    .isNumeric()
+    .withMessage("Days After Sowing must be a number"),
+  check("fertiliser")
+    .optional()
+    .isString()
+    .withMessage("Fertiliser must be a string"),
+  check("quantity")
+    .optional()
+    .isNumeric()
+    .withMessage("Quantity must be a number"),
+  check("quantityUnit")
+    .optional()
+    .isIn(["ton", "kg", "g", "L", "mL"])
+    .withMessage(
+      "Quantity Unit must be either ton, kg, g for solids or L, mL for liquids"
+    ),
+];
 
 exports.getSchedules = async function (req, res) {
   await prisma.schedule
@@ -14,7 +36,24 @@ exports.getSchedules = async function (req, res) {
 };
 
 exports.addSchedule = async function (req, res) {
-  const { daysAfterSowing, fertiliser, quantity, quantityUnit, farmId } = req.body;
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { daysAfterSowing, fertiliser, quantity, quantityUnit, farmId } =
+    req.body;
+
+  const farm = await prisma.farm.findUnique({
+    where: {
+      id: farmId,
+    },
+  });
+
+  if (!farm) {
+    return res.status(400).json({ error: "Farm ID does not exist" });
+  }
+
   await prisma.schedule
     .create({
       data: {
@@ -22,7 +61,7 @@ exports.addSchedule = async function (req, res) {
         fertiliser,
         quantity,
         quantityUnit,
-        farmId
+        farmId,
       },
     })
     .then((schedule) => {
@@ -37,6 +76,17 @@ exports.addSchedule = async function (req, res) {
 
 exports.removeSchedule = async function (req, res) {
   const { id } = req.body;
+
+  const schedule = await prisma.schedule.findUnique({
+    where: {
+      id: id,
+    },
+  });
+
+  if (!schedule) {
+    return res.status(400).json({ error: "Schedule ID does not exist" });
+  }
+
   await prisma.schedule
     .delete({
       where: {
@@ -54,7 +104,34 @@ exports.removeSchedule = async function (req, res) {
 };
 
 exports.updateSchedule = async function (req, res) {
-  const { daysAfterSowing, fertiliser, quantity, quantityUnit, farmId } = req.body;
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id, daysAfterSowing, fertiliser, quantity, quantityUnit, farmId } =
+    req.body;
+
+  const schedule = await prisma.schedule.findUnique({
+    where: {
+      id: id,
+    },
+  });
+
+  if (!schedule) {
+    return res.status(400).json({ error: "Schedule ID does not exist" });
+  }
+
+  const farm = await prisma.farm.findUnique({
+    where: {
+      id: farmId,
+    },
+  });
+
+  if (!farm) {
+    return res.status(400).json({ error: "Farm ID does not exist" });
+  }
+
   await prisma.schedule
     .update({
       where: {
@@ -65,7 +142,7 @@ exports.updateSchedule = async function (req, res) {
         fertiliser,
         quantity,
         quantityUnit,
-        farmId
+        farmId,
       },
     })
     .then((schedule) => {
@@ -91,7 +168,9 @@ exports.getSchedulesDue = async function (req, res) {
 
   const dueSchedules = schedules.filter((schedule) => {
     const sowingDate = new Date(schedule.farm.sowingDate);
-    const daysSinceSowing = Math.ceil((today - sowingDate) / (1000 * 60 * 60 * 24));
+    const daysSinceSowing = Math.ceil(
+      (today - sowingDate) / (1000 * 60 * 60 * 24)
+    );
     const daysUntilDue = schedule.daysAfterSowing - daysSinceSowing;
 
     return daysUntilDue === 0 || daysUntilDue === 1;
@@ -99,4 +178,4 @@ exports.getSchedulesDue = async function (req, res) {
 
   res.json(dueSchedules);
   console.log("Info: Total", dueSchedules.length, "schedules due.");
-}
+};

@@ -1,4 +1,29 @@
 const prisma = require("../lib/prisma");
+const { check, validationResult } = require("express-validator");
+
+exports.validateFarmInputs = [
+  check("area").optional().isNumeric().withMessage("Area must be a number"),
+  check("village")
+    .optional()
+    .isString()
+    .withMessage("Village must be a string"),
+  check("cropGrown")
+    .optional()
+    .isString()
+    .withMessage("Crop Grown must be a string"),
+  check("sowingDate")
+    .optional()
+    .isString()
+    .withMessage("Sowing Date must be a valid date"),
+  check("country")
+    .optional()
+    .isString()
+    .withMessage("Country must be a string"),
+  check("farmerId")
+    .optional()
+    .isString()
+    .withMessage("Farmer ID must be a valid UUID"),
+];
 
 exports.getFarms = async function (req, res) {
   await prisma.farm
@@ -14,16 +39,32 @@ exports.getFarms = async function (req, res) {
 };
 
 exports.addFarm = async function (req, res) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   const { area, village, cropGrown, sowingDate, country, farmerId } = req.body;
+
+  const farmer = await prisma.farmer.findUnique({
+    where: {
+      id: farmerId,
+    },
+  });
+
+  if (!farmer) {
+    return res.status(400).json({ error: "Farmer ID does not exist" });
+  }
+
   await prisma.farm
     .create({
       data: {
-        area,
+        area: parseFloat(area),
         village,
         cropGrown,
         sowingDate: new Date(sowingDate),
         country,
-        farmerId
+        farmerId,
       },
     })
     .then((farm) => {
@@ -38,6 +79,17 @@ exports.addFarm = async function (req, res) {
 
 exports.removeFarm = async function (req, res) {
   const { id } = req.body;
+
+  const farm = await prisma.farm.findUnique({
+    where: {
+      id: id,
+    },
+  });
+
+  if (!farm) {
+    return res.status(400).json({ error: "Farm ID does not exist" });
+  }
+
   await prisma.farm
     .delete({
       where: {
@@ -55,19 +107,46 @@ exports.removeFarm = async function (req, res) {
 };
 
 exports.updateFarm = async function (req, res) {
-  const { id, area, village, cropGrown, sowingDate, country, farmerId } = req.body;
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { id, area, village, cropGrown, sowingDate, country, farmerId } =
+    req.body;
+
+  const farm = await prisma.farm.findUnique({
+    where: {
+      id: id,
+    },
+  });
+
+  if (!farm) {
+    return res.status(400).json({ error: "Farm ID does not exist" });
+  }
+
+  const farmer = await prisma.farmer.findUnique({
+    where: {
+      id: farmerId,
+    },
+  });
+
+  if (!farmer) {
+    return res.status(400).json({ error: "Farmer ID does not exist" });
+  }
+
   await prisma.farm
     .update({
       where: {
         id: id,
       },
       data: {
-        area,
+        area: parseFloat(area),
         village,
         cropGrown,
         sowingDate: sowingDate == null ? null : new Date(sowingDate),
         country,
-        farmerId
+        farmerId,
       },
     })
     .then((farm) => {
