@@ -19,5 +19,6 @@ router.post('/getSchedules', scheduleController.getSchedules);
 router.post('/addSchedule', scheduleController.addSchedule);
 router.post('/removeSchedule', scheduleController.removeSchedule);
 router.post('/updateSchedule', scheduleController.updateSchedule);
+router.post('/getSchedulesDue', scheduleController.getSchedulesDue);
 
 module.exports = router;
