@@ -12,3 +12,33 @@ datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
+
+model Farmer {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  phoneNumber String @unique
+  language  String
+  farms     Farm[]   @relation("farmerToFarms")
+}
+
+model Farm {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  area      Float
+  village   String
+  cropGrown String
+  sowingDate DateTime
+  country   String
+  farmer    Farmer   @relation("farmerToFarms", fields: [farmerId], references: [id])
+  farmerId  String   @map("farmerId") @db.ObjectId
+  schedules Schedule[] @relation("farmToSchedules")
+}
+
+model Schedule {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  daysAfterSowing Int
+  fertiliser String
+  quantity   Float
+  quantityUnit String
+  farm       Farm     @relation("farmToSchedules", fields: [farmId], references: [id])
+  farmId     String   @map("farmId") @db.ObjectId
+}
