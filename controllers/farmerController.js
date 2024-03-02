@@ -91,6 +91,20 @@ exports.removeFarmer = async function (req, res) {
     return res.status(400).json({ error: "Farmer ID does not exist" });
   }
 
+  await prisma.schedule.deleteMany({
+    where: {
+      farm: {
+        farmerId: id,
+      },
+    },
+  });
+
+  await prisma.farm.deleteMany({
+    where: {
+      farmerId: id,
+    },
+  });
+
   await prisma.farmer
     .delete({
       where: {

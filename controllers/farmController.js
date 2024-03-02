@@ -107,7 +107,7 @@ exports.addFarm = async function (req, res) {
         area: parseFloat(area),
         village,
         cropGrown,
-        sowingDate: new Date(sowingDate),
+        sowingDate: sowingDate == null ? null : new Date(sowingDate),
         country,
         farmerId,
       },
@@ -134,6 +134,12 @@ exports.removeFarm = async function (req, res) {
   if (!farm) {
     return res.status(400).json({ error: "Farm ID does not exist" });
   }
+
+  await prisma.schedule.deleteMany({
+    where: {
+      farmId: id,
+    },
+  });
 
   await prisma.farm
     .delete({
